@@ -1,30 +1,33 @@
-"""Embedding provider."""
+"""ZhipuAI embedding provider."""
 
-from .config import EMBEDDING_PROVIDER, GEMINI_API_KEY, EMBEDDING_MODEL
+import httpx
+from .config import ZHIPUAI_API_KEY, EMBEDDING_MODEL, EMBEDDING_DIMENSIONS
+
+_EMBED_URL = "https://open.bigmodel.cn/api/paas/v4/embeddings"
 
 
 async def embed_texts(texts: list[str]) -> list[list[float]]:
-    """Generate embeddings for a list of texts."""
-    if EMBEDDING_PROVIDER == "gemini":
-        return await _embed_gemini(texts)
-    raise ValueError(f"Unsupported embedding provider: {EMBEDDING_PROVIDER}")
+    """Generate embeddings via ZhipuAI embedding-3."""
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.post(
+            _EMBED_URL,
+            headers={
+                "Authorization": f"Bearer {ZHIPUAI_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": EMBEDDING_MODEL,
+                "input": texts,
+                "dimensions": EMBEDDING_DIMENSIONS,
+            },
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        # Sort by index to maintain order
+        embeddings = sorted(data["data"], key=lambda x: x["index"])
+        return [e["embedding"] for e in embeddings]
 
 
 async def embed_query(text: str) -> list[float]:
-    """Embed a single query string."""
     results = await embed_texts([text])
     return results[0]
-
-
-async def _embed_gemini(texts: list[str]) -> list[list[float]]:
-    import google.generativeai as genai
-
-    genai.configure(api_key=GEMINI_API_KEY)
-    result = genai.embed_content(
-        model=EMBEDDING_MODEL,
-        content=texts,
-        task_type="retrieval_query" if len(texts) == 1 else "RETRIEVAL_DOCUMENT",
-    )
-    if len(texts) == 1:
-        return [result["embedding"]]
-    return [e["embedding"] for e in result["embedding"]]

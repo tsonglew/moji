@@ -4,6 +4,9 @@ import asyncio
 import argparse
 import logging
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from .config import IMAGE_EXTENSIONS
 from .tagger import tag_image, build_search_text

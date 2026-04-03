@@ -1,18 +1,15 @@
 import os
 from pathlib import Path
 
-# Embedding provider: "gemini" or "local"
-EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "gemini")
+# === ZhipuAI Config ===
+ZHIPUAI_API_KEY = os.getenv("ZHIPUAI_API_KEY", "")
 
-# VLM provider for tagging: "gemini" or "openai"
-VLM_PROVIDER = os.getenv("VLM_PROVIDER", "gemini")
+# VLM for tagging
+VLM_MODEL = os.getenv("VLM_MODEL", "glm-5v-turbo")
 
-# Gemini
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
-
-# Embedding model
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "models/text-embedding-004")
+# Embedding
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "embedding-3")
+EMBEDDING_DIMENSIONS = int(os.getenv("EMBEDDING_DIMENSIONS", "2048"))
 
 # ChromaDB
 CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", str(Path(__file__).parent / "data"))
